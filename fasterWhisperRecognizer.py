@@ -1,18 +1,22 @@
 ### Same test rendition as whisperRecognizer.py but with the faster_whisper library
 ### They boast better performance by 4x
+
 from faster_whisper import WhisperModel
 import os as os
 import pyaudio
 from colorama import Fore
 import wave
 
+# Surpresses the KMP duplicate library error
 os.environ["KMP_DUPLICATE_LIB_OK"]="TRUE"
-
+# Initialize the model
 model = WhisperModel('tiny', device='cuda', compute_type='float16')
+# Pyaudio settings
 FORMAT = pyaudio.paInt16 #audio encoding format 16 bit signed int
 RATE = 16000 # sample rate, 16000-22000 is good enough for speech
 CHANEL = 1 # The number of audio channels being managed
 CHUNK = 1024 # Number of audio frames before buffer creation
+
 temp_file_location = "C:/Users/JWald/Documents/PythonProjects/deleteme.wav"
 
 def record_audio():
@@ -28,11 +32,6 @@ def record_audio():
     
     print(Fore.GREEN + "Completed Recording" + Fore.WHITE)
     
-    # Stream management
-    # stream.stop_stream()
-    # stream.close()
-    # audio.terminate()
-    
     wvfile = wave.open(temp_file_location, "wb")
     wvfile.setnchannels(1)
     wvfile.setsampwidth(audio.get_sample_size(pyaudio.paInt16))
@@ -45,6 +44,7 @@ def transcribe_audio():
     transcription = ""
     for segment in segments:
         transcription += segment.text + " "
+    os.remove(temp_file_location)
     return transcription.strip()
 
 def transcribe_frankestein():
@@ -53,22 +53,16 @@ def transcribe_frankestein():
         print(segment)
 
 def main():
-    # transcribe_frankestein()
+    print("Testing the whisper model with prercorded audio: Frankenstein")
+    transcribe_frankestein()
     try:  
         while True:
             record_audio()
-            words = transcribe_audio()
-            print(words)
-            if len(words) != 0 and words[-1] == 'Okay.':
-                print("we did the okay spam stopping the program")
-                break
-            os.remove(temp_file_location)
+            print(transcribe_audio())
     except KeyboardInterrupt:
-        print("Pressed a button")
         pass
     finally:
         print("Completed")
-    
         
 if __name__ == "__main__":
     main()
